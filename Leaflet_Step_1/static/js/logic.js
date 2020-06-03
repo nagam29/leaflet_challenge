@@ -10,7 +10,7 @@ d3.json(queryUrl, function(data) {
   // Once we get a response, send the data.features object to the createFeatures function
   console.log(data.features);
   createFeatures(data.features);
-});
+
 
 function createFeatures(earthquakeData) {
 
@@ -21,36 +21,42 @@ function createFeatures(earthquakeData) {
       "</h3><hr><p>" + new Date(feature.properties.time) + "</p>" +
       "<hr><p>" + (feature.properties.mag) + "</p>");
       console.log(feature);
+      console.log(layer);
       /*console.log(layer); */
+    };
+    
+    // conditionally decide color and size of circle 
+    for (var i=0; i < data.features.length; i++) {
+        magnitude=+data.features[i].properties.mag;
 
-      // conditionally decide color and size of circle 
-      for (var i=0; i < feature.length; i++) {
+      if (magnitude <=4.6) {
+          color='yellow';
+          radius = magnitude * 1000
+          }
+    
+      else if (magnitude <= 4.8) {
+          color='gold';
+          radius = magnitude * 1000
+          }
+    
+      else if (magnitude <= 5.0) {
+          color='orange';
+          radius = magnitude * 1000
+          }
+            
+      else /*(feature[i].mag <=7.0) */{
+          color='red';
+          radius = magnitude * 1000
+          }
+    };
 
-        var color='';
+    // loop through coordinates 
+  
+    for (var j=0; j < data.features.length; j++) {
+      var location=data.features[j].geometry.coordinates;
+      console.log(location);
 
-        if (feature[i].mag <=4.6) {
-            color='yellow';
-            radius = feature.mag * 1000
-        }
-
-        else if (feature[i].mag <= 4.8) {
-            color='gold';
-            radius = feature.mag * 1000
-        }
-
-        else if (feature[i].mag <= 5.0) {
-            color='orange';
-            radius = feature.mag * 1000
-        }
-        
-        else if (feature[i].mag <=7.0) {
-            color='red';
-            radius = feature.mag * 1000
-        }
-    }
-
-    // loop through feature and decide save coordinates for location of the quakes and magnutude
-
+    };
 
     // Create a GeoJSON layer containing the features array on the earthquakeData object
     // Run the onEachFeature function once for each piece of data in the array
@@ -62,6 +68,7 @@ function createFeatures(earthquakeData) {
     createMap(earthquakes);
 
 }
+
 
 function createMap(earthquakes) {
 
@@ -96,13 +103,14 @@ function createMap(earthquakes) {
     // Create a layer control
     // Pass in our baseMaps and overlayMaps
     // Add circles to map
-    L.circle(feature[i].geometry.coordinates, {
+    for (var i=0; i<data.features.length; i++) {
+      L.circle(location[i],{
         fillOpacity: 0.75,
         color: "white",
         fillColor: color,
         // Adjust radius
-        radius: countries[i].properties.mag * 500
-      }).bindPopup("<h1>" + feature[i].place + "</h1> <hr> <h3>Points: " + feature[i].mag + "</h3>").addTo(myMap);
-
+        radius: radius
+      }).bindPopup("<h1>" + data.features[i].place + "</h1> <hr> <h3>Points: " + data.features[i].mag + "</h3>").addTo(myMap);
+    }
 }
-
+});
